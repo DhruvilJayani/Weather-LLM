@@ -10,8 +10,15 @@ function App() {
     // Handle incoming messages from the WebSocket server
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
+      
+      const weatherData = data.weatherData;
+      const weatherAnalysis = data.weatherAnalysis;  // Access weather analysis
+      // Now you can use weatherData and weatherAnalysis in your UI
+      console.log("Weather Data:", weatherData);
+      console.log("Weather Analysis:", weatherAnalysis);
+
       if (data.weatherAnalysis) {
-        setWeatherAnalysis(data.weatherAnalysis);
+        setWeatherAnalysis(data.weatherData + data.weatherAnalysis);
       }
     };
 

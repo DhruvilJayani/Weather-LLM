@@ -76,7 +76,10 @@ client.on('message', async (topic, message) => {
     // Send the response to WebSocket clients
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({ weatherAnalysis: responseText }));
+        client.send(JSON.stringify({
+          weatherData: weatherData,      // Send weather data as a separate field
+          weatherAnalysis: responseText  // Send the analysis as a separate field
+        }));
       }
     });
   } catch (error) {
