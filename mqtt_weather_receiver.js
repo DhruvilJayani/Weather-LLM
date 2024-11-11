@@ -62,7 +62,8 @@ client.on('message', async (topic, message) => {
         // console.log("Ollama response:", response.message.content);
         console.log("Cerebras response:", completionCreateResponse);
         console.log("Time taken by Cerebras to respond:", duration, "ms");
-
+        const responseText = completionCreateResponse.choices[0].message.content;
+        console.log("Response Text:", responseText);
     } catch (error) {
         console.error("Error while fetching Ollama response:", error);
     }
