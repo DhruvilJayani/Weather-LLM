@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import  Circle  from 'react-progressbar-circle';
-import { FaCloud, FaSun, FaWind, FaRegFlag, FaThermometerHalf, FaWater } from 'react-icons/fa'; // Icons
+import Circle from 'react-progressbar-circle';
+import { FaCloud, FaSun, FaWind, FaRegFlag, FaThermometerHalf, FaWater } from 'react-icons/fa';
 
 function App() {
   const [weatherAnalysis, setWeatherAnalysis] = useState(null);
@@ -8,40 +8,25 @@ function App() {
   const [backgroundClass, setBackgroundClass] = useState('bg-blue-500');
 
   useEffect(() => {
-    // Create a WebSocket connection to the server
     const ws = new WebSocket('ws://localhost:9000');
 
-    // Handle incoming messages from the WebSocket server
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      // Access weatherData and weatherAnalysis from the response
-      const receivedWeatherData = data.weatherData;
-      const receivedWeatherAnalysis = data.weatherAnalysis;
+      setWeatherData(data.weatherData);
+      setWeatherAnalysis(data.weatherAnalysis);
 
-      // Update state with the received data
-      setWeatherData(receivedWeatherData);
-      setWeatherAnalysis(receivedWeatherAnalysis);
-
-      // Set background class based on weather condition
-      if (receivedWeatherData.weather_condition === 'Rainy') {
-        setBackgroundClass('bg-gray-900');
-      } else if (receivedWeatherData.weather_condition === 'Sunny') {
-        setBackgroundClass('bg-yellow-500');
-      } else if (receivedWeatherData.weather_condition === 'Foggy') {
-        setBackgroundClass('bg-gray-400');
-      }
+      // Set background based on weather condition
+      const condition = data.weatherData.weather_condition;
+      if (condition === 'Rainy') setBackgroundClass('bg-gray-900');
+      else if (condition === 'Sunny') setBackgroundClass('bg-yellow-500');
+      else if (condition === 'Foggy') setBackgroundClass('bg-gray-400');
+      else setBackgroundClass('bg-blue-500');
     };
 
-    // Handle WebSocket errors
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+    ws.onerror = (error) => console.error('WebSocket error:', error);
 
-    // Clean up WebSocket connection on component unmount
-    return () => {
-      ws.close();
-    };
+    return () => ws.close();
   }, []);
 
   return (
@@ -52,11 +37,11 @@ function App() {
         {/* Weather Data Section */}
         {weatherData ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Temperature with Circular Progress */}
+            {/* Temperature */}
             <div className="bg-red-100 p-6 rounded-lg shadow-lg text-center">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Temperature</h2>
               <Circle
-                percentage={(weatherData.temperature + 10) * 2} // Assuming the range is -10 to 40°C
+                percentage={(weatherData.temperature + 10) * 2} // Assuming range -10°C to 40°C
                 size={100}
                 strokeWidth={6}
                 color="#FF5733"
@@ -68,95 +53,51 @@ function App() {
             {/* Humidity */}
             <div className="bg-blue-100 p-6 rounded-lg shadow-lg text-center">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Humidity</h2>
-              <p className="text-3xl text-gray-700">{weatherData ? weatherData.humidity : 0}%</p>
+              <p className="text-3xl text-gray-700">{weatherData.humidity}%</p>
               <FaWater className="text-4xl text-gray-600 mt-4 mx-auto" />
             </div>
 
-            {/* Weather Condition (Cloud Icon) */}
+            {/* Weather Condition */}
             <div className="bg-teal-100 p-6 rounded-lg shadow-lg text-center">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Weather Condition</h2>
-              <p className="text-3xl text-gray-700">{weatherData ? weatherData.weather_condition : 'Loading...'}</p>
+              <p className="text-3xl text-gray-700">{weatherData.weather_condition}</p>
               <FaCloud className="text-5xl text-gray-600 mt-4 mx-auto" />
             </div>
 
             {/* Wind Speed */}
             <div className="bg-indigo-100 p-6 rounded-lg shadow-lg text-center">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Wind Speed</h2>
-              <p className="text-3xl text-gray-700">{weatherData ? weatherData.wind_speed : 0} m/s</p>
+              <p className="text-3xl text-gray-700">{weatherData.wind_speed} km/h</p>
               <FaWind className="text-4xl text-gray-600 mt-4 mx-auto" />
             </div>
 
-            {/* Visibility (Fog Icon) */}
-            <div className={`bg-gray-200 p-6 rounded-lg shadow-lg text-center ${backgroundClass === 'bg-gray-900' ? 'bg-gray-700' : ''}`}>
+            {/* Visibility */}
+            <div className="bg-gray-200 p-6 rounded-lg shadow-lg text-center">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">Visibility</h2>
-              <p className="text-3xl text-gray-700">{weatherData ? weatherData.visibility : 0} km</p>
+              <p className="text-3xl text-gray-700">{weatherData.visibility} km</p>
               <FaRegFlag className="text-4xl text-gray-600 mt-4 mx-auto" />
             </div>
 
             {/* UV Index */}
-            <div className={`bg-pink-100 p-6 rounded-lg shadow-lg text-center ${backgroundClass === 'bg-yellow-500' ? 'bg-yellow-300' : ''}`}>
+            <div className="bg-pink-100 p-6 rounded-lg shadow-lg text-center">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">UV Index</h2>
-              <p className="text-3xl text-gray-700">{weatherData ? weatherData.UV_index : 0}</p>
+              <p className="text-3xl text-gray-700">{weatherData.UV_index}</p>
               <FaSun className="text-4xl text-gray-600 mt-4 mx-auto" />
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Placeholder for Temperature */}
-            <div className="bg-red-100 p-6 rounded-lg shadow-lg text-center">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Temperature</h2>
-              <Circle
-                percentage={0}
-                size={100}
-                strokeWidth={6}
-                color="#FF5733"
-              />
-              <p className="text-2xl text-gray-700 mt-4">0°C</p>
-              <FaThermometerHalf className="text-4xl text-gray-600 mt-4 mx-auto" />
-            </div>
-
-            {/* Placeholder for Humidity */}
-            <div className="bg-blue-100 p-6 rounded-lg shadow-lg text-center">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Humidity</h2>
-              <p className="text-3xl text-gray-700">0%</p>
-              <FaWater className="text-4xl text-gray-600 mt-4 mx-auto" />
-            </div>
-
-            {/* Placeholder for Weather Condition */}
-            <div className="bg-teal-100 p-6 rounded-lg shadow-lg text-center">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Weather Condition</h2>
-              <p className="text-3xl text-gray-700">Loading...</p>
-              <FaCloud className="text-5xl text-gray-600 mt-4 mx-auto" />
-            </div>
-
-            {/* Placeholder for Wind Speed */}
-            <div className="bg-indigo-100 p-6 rounded-lg shadow-lg text-center">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Wind Speed</h2>
-              <p className="text-3xl text-gray-700">0 m/s</p>
-              <FaWind className="text-4xl text-gray-600 mt-4 mx-auto" />
-            </div>
-
-            {/* Placeholder for Visibility */}
-            <div className={`bg-gray-200 p-6 rounded-lg shadow-lg text-center ${backgroundClass === 'bg-gray-900' ? 'bg-gray-700' : ''}`}>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Visibility</h2>
-              <p className="text-3xl text-gray-700">0 km</p>
-              <FaRegFlag className="text-4xl text-gray-600 mt-4 mx-auto" />
-            </div>
-
-            {/* Placeholder for UV Index */}
-            <div className={`bg-pink-100 p-6 rounded-lg shadow-lg text-center ${backgroundClass === 'bg-yellow-500' ? 'bg-yellow-300' : ''}`}>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">UV Index</h2>
-              <p className="text-3xl text-gray-700">0</p>
-              <FaSun className="text-4xl text-gray-600 mt-4 mx-auto" />
-            </div>
-          </div>
+          <p className="text-center text-gray-500">Loading weather data...</p>
         )}
 
-        {/* Weather Analysis (Summary) Section */}
+        {/* Weather Analysis Section */}
         {weatherAnalysis && (
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-8">
+          <div className="bg-gray-100 p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Weather Analysis</h2>
-            <p className="text-gray-700">{weatherAnalysis}</p>
+            <div className="space-y-4 text-gray-700">
+              {weatherAnalysis.split('\n').map((line, index) => (
+                <p key={index} className="text-lg leading-relaxed">{line.trim()}</p>
+              ))}
+            </div>
           </div>
         )}
       </div>
